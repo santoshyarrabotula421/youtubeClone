@@ -51,17 +51,13 @@ const userSchema = new Schema({
 }
 )
 
-userSchema.pre("save",async function (next) {
-    if(!this.isModified("password")) return next() // checking wheter the password field is changes or not. if not changed then why we need to encrypt the old password again.
-    this.password = await bcrypt.hash(this.password,10)
-    next()
-})  
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
 
-userSchema.methods.isPasswordCorrect = async function(password){
-  return await bcrypt.compare(password,this.password)
-}
+    this.password = await bcrypt.hash(this.password, 10);
+});
 
-userSchema.methods.generateAccessToken = async function(password){
+userSchema.methods.generateAccessToken =  function(password){
    return jwt.sign(
         {
             _id : this._id,
@@ -75,7 +71,11 @@ userSchema.methods.generateAccessToken = async function(password){
         }
     )
 }
-userSchema.methods.generateRefreshToken = async function(password){
+userSchema.methods.isPasswordCorrect = async function(password)
+{
+    return await bcrypt.compare(password,this.password)
+}
+userSchema.methods.generateRefreshToken = function(password){
     return jwt.sign(
         {
             _id : this._id
